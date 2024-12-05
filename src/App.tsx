@@ -1,26 +1,78 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import QuestionForm from "./components/QuestionForm";
+import QuestionList from "./components/QuestionsList";
+import GeneratedForm from "./components/GeneratedForm";
+import "./App.css";
 
-function App() {
+interface Question {
+  id: number;
+  title: string;
+  subtitle?: string;
+  type: string;
+  required: boolean;
+  options?: string[];
+}
+
+const App: React.FC = () => {
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+
+  const addQuestion = (question: Question) => {
+    setQuestions((prev) => [...prev, question]);
+  };
+
+  const handleCreateForm = () => {
+    if (questions.length === 0) {
+      alert("Please add at least one question to generate the form.");
+      return;
+    }
+    setShowForm(true);
+  };
+
+  const deleteQuestion = (id: number) => {
+    setQuestions((prev) => prev.filter((q) => q.id !== id));
+  };
+
+  const editQuestion = (question: Question) => {
+    setEditingQuestion(question);
+  };
+
+  const updateQuestion = (updatedQuestion: Question) => {
+    setQuestions((prev) =>
+      prev.map((q) => (q.id === updatedQuestion.id ? updatedQuestion : q))
+    );
+    setEditingQuestion(null);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container">
+      <div className="question-form">
+        <QuestionForm
+          addQuestion={addQuestion}
+          editingQuestion={editingQuestion}
+          updateQuestion={updateQuestion}
+        />
+      </div>
+
+      <div className="question-list">
+        <QuestionList
+          questions={questions}
+          deleteQuestion={deleteQuestion}
+          editQuestion={editQuestion}
+        />
+        <button className="create-form-btn" onClick={handleCreateForm}>
+          Create Form
+        </button>
+      </div>
+
+      <div className="phone-mockup">
+        <div className="generated-form-container">
+          {showForm && <GeneratedForm questions={questions} />}
+        </div>
+      </div>
     </div>
   );
-}
+};
 
 export default App;
