@@ -27,7 +27,13 @@ const App: React.FC = () => {
       alert("Please add at least one question to generate the form.");
       return;
     }
+    console.log("Generated Form JSON:", JSON.stringify(questions, null, 2));
     setShowForm(true);
+  };
+
+  const handleSubmitForm = (formData: Record<string, any>) => {
+    // Log submitted form data
+    console.log("Submitted Form Data:", JSON.stringify(formData, null, 2));
   };
 
   const deleteQuestion = (id: number) => {
@@ -68,7 +74,12 @@ const App: React.FC = () => {
 
       <div className="phone-mockup">
         <div className="generated-form-container">
-          {showForm && <GeneratedForm questions={questions} />}
+          {showForm && (
+            <GeneratedForm
+              questions={questions}
+              handleSubmitForm={handleSubmitForm}
+            />
+          )}
         </div>
       </div>
     </div>
