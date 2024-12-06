@@ -32,7 +32,6 @@ const App: React.FC = () => {
   };
 
   const handleSubmitForm = (formData: Record<string, any>) => {
-    // Log submitted form data
     console.log("Submitted Form Data:", JSON.stringify(formData, null, 2));
   };
 
