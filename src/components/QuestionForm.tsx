@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from "react";
 
+export interface Option {
+  id: number;
+  name: string;
+}
+
 export interface Question {
   id: number;
   title: string;
   subtitle?: string;
   type: string;
   required: boolean;
-  options?: string[];
+  options?: Option[];
 }
 
 interface QuestionFormProps {
@@ -24,7 +29,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   const [subtitle, setSubtitle] = useState("");
   const [type, setType] = useState("text");
   const [required, setRequired] = useState(false);
-  const [options, setOptions] = useState<string[]>([""]);
+  const [options, setOptions] = useState<Option[]>([{ id: 1, name: "" }]);
 
   useEffect(() => {
     if (editingQuestion) {
@@ -32,19 +37,19 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
       setSubtitle(editingQuestion.subtitle || "");
       setType(editingQuestion.type);
       setRequired(editingQuestion.required);
-      setOptions(editingQuestion.options || [""]);
+      setOptions(editingQuestion.options || [{ id: 1, name: "" }]);
     }
   }, [editingQuestion]);
 
   const handleAddQuestion = () => {
     if (title.trim() === "") return;
-    const newQuestion = {
+    const newQuestion: Question = {
       id: Date.now(),
       title,
       subtitle,
       type,
       required,
-      options: options.filter((opt) => opt.trim() !== ""),
+      options: options.filter((opt) => opt.name.trim() !== ""),
     };
     addQuestion(newQuestion);
     resetForm();
@@ -52,13 +57,13 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
 
   const handleUpdateQuestion = () => {
     if (title.trim() === "") return;
-    const updatedQuestion = {
+    const updatedQuestion: Question = {
       ...editingQuestion!,
       title,
       subtitle,
       type,
       required,
-      options: options.filter((opt) => opt.trim() !== ""),
+      options: options.filter((opt) => opt.name.trim() !== ""),
     };
     updateQuestion(updatedQuestion);
     resetForm();
@@ -66,12 +71,15 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
 
   const handleOptionChange = (index: number, value: string) => {
     const updatedOptions = [...options];
-    updatedOptions[index] = value;
+    updatedOptions[index] = { id: index + 1, name: value };
     setOptions(updatedOptions);
   };
 
   const addOption = () => {
-    setOptions((prevOptions) => [...prevOptions, ""]);
+    setOptions((prevOptions) => [
+      ...prevOptions,
+      { id: prevOptions.length + 1, name: "" },
+    ]);
   };
 
   const resetForm = () => {
@@ -79,7 +87,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
     setSubtitle("");
     setType("text");
     setRequired(false);
-    setOptions([""]);
+    setOptions([{ id: 1, name: "" }]);
   };
 
   return (
@@ -115,7 +123,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
               <input
                 type="text"
                 placeholder={`Option ${index + 1}`}
-                value={option}
+                value={option.name}
                 onChange={(e) => handleOptionChange(index, e.target.value)}
               />
             </div>

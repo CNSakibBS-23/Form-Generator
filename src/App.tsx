@@ -3,19 +3,12 @@ import QuestionForm from "./components/QuestionForm";
 import QuestionList from "./components/QuestionsList";
 import GeneratedForm from "./components/GeneratedForm";
 import "./App.css";
-
-interface Question {
-  id: number;
-  title: string;
-  subtitle?: string;
-  type: string;
-  required: boolean;
-  options?: string[];
-}
+import { Question } from "./types";
 
 const App: React.FC = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [formUid, setFormUid] = useState<string>("");
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
 
   const addQuestion = (question: Question) => {
@@ -27,12 +20,53 @@ const App: React.FC = () => {
       alert("Please add at least one question to generate the form.");
       return;
     }
-    console.log("Generated Form JSON:", JSON.stringify(questions, null, 2));
+
+    const generatedFormUid = `${Date.now().toString(36)}-${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+    setFormUid(generatedFormUid);
+
+    const formattedJson = {
+      form_uid: generatedFormUid,
+      categories: [
+        {
+          id: 1,
+          name: "Default Category",
+          questions: questions.map((q) => ({
+            id: q.id,
+            title: q.title,
+            required: q.required,
+            type: q.type,
+            options: q.options || [],
+          })),
+        },
+      ],
+    };
+
+    console.log("Generated Form JSON:", JSON.stringify(formattedJson, null, 2));
     setShowForm(true);
   };
 
-  const handleSubmitForm = (formData: Record<string, any>) => {
-    console.log("Submitted Form Data:", JSON.stringify(formData, null, 2));
+  const handleSubmitForm = (formData: Record<number, any>) => {
+    const formattedJson = {
+      form_uid: formUid,
+      categories: [
+        {
+          id: 1,
+          name: "Default Category",
+          questions: questions.map((q) => ({
+            id: q.id,
+            title: q.title,
+            required: q.required,
+            type: q.type,
+            options: q.options || [],
+            value: formData[q.id] || null,
+          })),
+        },
+      ],
+    };
+
+    console.log("Submitted Form Data:", JSON.stringify(formattedJson, null, 2));
   };
 
   const deleteQuestion = (id: number) => {

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Question } from "./QuestionForm";
+import { Question } from "../types";
 
 interface GeneratedFormProps {
   questions: Question[];
@@ -10,34 +10,20 @@ const GeneratedForm: React.FC<GeneratedFormProps> = ({
   questions,
   handleSubmitForm,
 }) => {
-  const [formData, setFormData] = useState<Record<string, any>>({});
-  const [ratings, setRatings] = useState<{ [key: number]: number }>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [formData, setFormData] = useState<Record<number, any>>({});
+  const [errors, setErrors] = useState<Record<number, string>>({});
 
   const handleInputChange = (questionId: number, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      [questionId]: value,
-    }));
-  };
-
-  const handleRatingChange = (questionId: number, rating: number) => {
-    setRatings((prevRatings) => ({ ...prevRatings, [questionId]: rating }));
-    setFormData((prev) => ({
-      ...prev,
-      [questionId]: rating,
-    }));
+    setFormData((prev) => ({ ...prev, [questionId]: value }));
   };
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
+    const newErrors: Record<number, string> = {};
     questions.forEach((question) => {
       if (question.required && !formData[question.id]) {
         newErrors[question.id] = `${question.title} is required`;
       }
     });
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -52,28 +38,12 @@ const GeneratedForm: React.FC<GeneratedFormProps> = ({
     <div>
       <h2>Generated Form</h2>
       <form>
-        {questions.map((question, index) => (
+        {questions.map((question) => (
           <div key={question.id} className="form-field">
             <label>
-              {index + 1}. {question.title}
+              {question.title}
               {question.required && " *"}
-              {question.subtitle && <small> ({question.subtitle})</small>}
             </label>
-            {question.type === "rating" && (
-              <div className="star-rating">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <span
-                    key={star}
-                    className={`star ${
-                      ratings[question.id] >= star ? "selected" : ""
-                    }`}
-                    onClick={() => handleRatingChange(question.id, star)}
-                  >
-                    ★
-                  </span>
-                ))}
-              </div>
-            )}
 
             {question.type === "text" && (
               <input
@@ -82,12 +52,14 @@ const GeneratedForm: React.FC<GeneratedFormProps> = ({
                 onChange={(e) => handleInputChange(question.id, e.target.value)}
               />
             )}
+
             {question.type === "textarea" && (
               <textarea
                 value={formData[question.id] || ""}
                 onChange={(e) => handleInputChange(question.id, e.target.value)}
               />
             )}
+
             {question.type === "number" && (
               <input
                 type="number"
@@ -95,6 +67,7 @@ const GeneratedForm: React.FC<GeneratedFormProps> = ({
                 onChange={(e) => handleInputChange(question.id, e.target.value)}
               />
             )}
+
             {question.type === "date" && (
               <input
                 type="date"
@@ -102,51 +75,54 @@ const GeneratedForm: React.FC<GeneratedFormProps> = ({
                 onChange={(e) => handleInputChange(question.id, e.target.value)}
               />
             )}
+
             {question.type === "select" && (
               <select
                 value={formData[question.id] || ""}
                 onChange={(e) => handleInputChange(question.id, e.target.value)}
               >
                 <option value="">Select an option</option>
-                {question.options?.map((option, idx) => (
-                  <option key={idx} value={option}>
-                    {option}
+                {question.options?.map((option) => (
+                  <option key={option.id} value={option.name}>
+                    {option.name}
                   </option>
                 ))}
               </select>
             )}
+
             {question.type === "radio" && (
               <div>
-                {question.options?.map((option, idx) => (
-                  <label key={idx}>
+                {question.options?.map((option) => (
+                  <label key={option.id}>
                     <input
                       type="radio"
                       name={`q${question.id}`}
-                      value={option}
-                      checked={formData[question.id] === option}
+                      value={option.name}
+                      checked={formData[question.id] === option.name}
                       onChange={(e) =>
                         handleInputChange(question.id, e.target.value)
                       }
                     />
-                    {option}
+                    {option.name}
                   </label>
                 ))}
               </div>
             )}
+
             {question.type === "checkbox" && (
               <div>
-                {question.options?.map((option, idx) => (
-                  <label key={idx}>
+                {question.options?.map((option) => (
+                  <label key={option.id}>
                     <input
                       type="checkbox"
-                      value={option}
+                      value={option.name}
                       checked={
                         Array.isArray(formData[question.id]) &&
-                        formData[question.id].includes(option)
+                        formData[question.id].includes(option.name)
                       }
                       onChange={(e) => {
                         const checked = e.target.checked;
-                        const value = option;
+                        const value = option.name;
                         setFormData((prev) => {
                           const prevValues = prev[question.id] || [];
                           return {
@@ -158,8 +134,24 @@ const GeneratedForm: React.FC<GeneratedFormProps> = ({
                         });
                       }}
                     />
-                    {option}
+                    {option.name}
                   </label>
+                ))}
+              </div>
+            )}
+
+            {question.type === "rating" && (
+              <div className="star-rating">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span
+                    key={star}
+                    className={`star ${
+                      formData[question.id] >= star ? "selected" : ""
+                    }`}
+                    onClick={() => handleInputChange(question.id, star)}
+                  >
+                    ★
+                  </span>
                 ))}
               </div>
             )}
