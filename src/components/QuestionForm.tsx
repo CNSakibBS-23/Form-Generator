@@ -71,7 +71,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
 
   const handleOptionChange = (index: number, value: string) => {
     const updatedOptions = [...options];
-    updatedOptions[index] = { id: index + 1, name: value }; // Make sure each option has { id, name }
+    updatedOptions[index] = { id: index + 1, name: value };
     setOptions(updatedOptions);
   };
 

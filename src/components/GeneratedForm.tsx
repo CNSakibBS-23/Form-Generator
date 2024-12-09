@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Question } from "../types"; // Assuming centralized types
+import { Question } from "../types";
 
 interface GeneratedFormProps {
   questions: Question[];
@@ -45,7 +45,6 @@ const GeneratedForm: React.FC<GeneratedFormProps> = ({
               {question.required && " *"}
             </label>
 
-            {/* Render input based on question type */}
             {question.type === "text" && (
               <input
                 type="text"

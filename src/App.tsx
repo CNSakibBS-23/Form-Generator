@@ -8,7 +8,7 @@ import { Question } from "./types";
 const App: React.FC = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [formUid, setFormUid] = useState<string>(""); // To store the form_uid
+  const [formUid, setFormUid] = useState<string>("");
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
 
   const addQuestion = (question: Question) => {
@@ -23,7 +23,7 @@ const App: React.FC = () => {
 
     const generatedFormUid = `${Date.now().toString(36)}-${Math.random()
       .toString(36)
-      .substr(2, 9)}`; // Generate unique form_uid
+      .substr(2, 9)}`;
     setFormUid(generatedFormUid);
 
     const formattedJson = {
@@ -49,7 +49,7 @@ const App: React.FC = () => {
 
   const handleSubmitForm = (formData: Record<number, any>) => {
     const formattedJson = {
-      form_uid: formUid, // Use the same form_uid generated earlier
+      form_uid: formUid,
       categories: [
         {
           id: 1,
@@ -60,7 +60,7 @@ const App: React.FC = () => {
             required: q.required,
             type: q.type,
             options: q.options || [],
-            value: formData[q.id] || null, // Attach submitted values here
+            value: formData[q.id] || null,
           })),
         },
       ],
