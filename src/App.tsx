@@ -31,7 +31,7 @@ const App: React.FC = () => {
       categories: [
         {
           id: 1,
-          name: "Default Category",
+          name: "Surveyor Details",
           questions: questions.map((q) => ({
             id: q.id,
             title: q.title,
