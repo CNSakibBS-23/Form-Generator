@@ -1,5 +1,5 @@
 import React from "react";
-import { Question } from "./QuestionForm";
+import { Question } from "../types/index";
 
 interface QuestionListProps {
   questions: Question[];
@@ -19,11 +19,9 @@ const QuestionList: React.FC<QuestionListProps> = ({
         <p>No questions added yet.</p>
       ) : (
         <ul>
-          {questions.map((question, index) => (
+          {questions.map((question) => (
             <li key={question.id} className="question-item">
-              <span>
-                {index + 1}. {question.title}
-              </span>
+              <span>{question.title}</span> {/* Removed index numbering */}
               <button
                 onClick={() => editQuestion(question)}
                 className="edit-btn"

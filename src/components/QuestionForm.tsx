@@ -1,18 +1,5 @@
 import React, { useState, useEffect } from "react";
-
-export interface Option {
-  id: number;
-  name: string;
-}
-
-export interface Question {
-  id: number;
-  title: string;
-  subtitle?: string;
-  type: string;
-  required: boolean;
-  options?: Option[];
-}
+import { Question, Option } from "../types";
 
 interface QuestionFormProps {
   addQuestion: (question: Question) => void;
@@ -27,9 +14,11 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
 }) => {
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
-  const [type, setType] = useState("text");
+  const [type, setType] = useState<Question["type"]>("text");
   const [required, setRequired] = useState(false);
   const [options, setOptions] = useState<Option[]>([{ id: 1, name: "" }]);
+  const [min, setMin] = useState<number>(0); // For slider
+  const [max, setMax] = useState<number>(10);
 
   useEffect(() => {
     if (editingQuestion) {
@@ -38,48 +27,29 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
       setType(editingQuestion.type);
       setRequired(editingQuestion.required);
       setOptions(editingQuestion.options || [{ id: 1, name: "" }]);
+      setMin(editingQuestion.min || 0);
+      setMax(editingQuestion.max || 10);
     }
   }, [editingQuestion]);
 
-  const handleAddQuestion = () => {
-    if (title.trim() === "") return;
+  const handleSave = () => {
+    if (!title.trim()) return;
+
     const newQuestion: Question = {
-      id: Date.now(),
+      id: editingQuestion?.id || Date.now(),
       title,
       subtitle,
       type,
       required,
-      options: options.filter((opt) => opt.name.trim() !== ""),
+      options: ["select", "radio", "checkbox", "tags"].includes(type)
+        ? options.filter((opt) => opt.name.trim() !== "")
+        : undefined,
+      min: type === "slider" ? min : undefined,
+      max: type === "slider" ? max : undefined,
     };
-    addQuestion(newQuestion);
+
+    editingQuestion ? updateQuestion(newQuestion) : addQuestion(newQuestion);
     resetForm();
-  };
-
-  const handleUpdateQuestion = () => {
-    if (title.trim() === "") return;
-    const updatedQuestion: Question = {
-      ...editingQuestion!,
-      title,
-      subtitle,
-      type,
-      required,
-      options: options.filter((opt) => opt.name.trim() !== ""),
-    };
-    updateQuestion(updatedQuestion);
-    resetForm();
-  };
-
-  const handleOptionChange = (index: number, value: string) => {
-    const updatedOptions = [...options];
-    updatedOptions[index] = { id: index + 1, name: value };
-    setOptions(updatedOptions);
-  };
-
-  const addOption = () => {
-    setOptions((prevOptions) => [
-      ...prevOptions,
-      { id: prevOptions.length + 1, name: "" },
-    ]);
   };
 
   const resetForm = () => {
@@ -88,6 +58,8 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
     setType("text");
     setRequired(false);
     setOptions([{ id: 1, name: "" }]);
+    setMin(0);
+    setMax(10);
   };
 
   return (
@@ -99,13 +71,10 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
-      <input
-        type="text"
-        placeholder="Subtitle (optional)"
-        value={subtitle}
-        onChange={(e) => setSubtitle(e.target.value)}
-      />
-      <select value={type} onChange={(e) => setType(e.target.value)}>
+      <select
+        value={type}
+        onChange={(e) => setType(e.target.value as Question["type"])}
+      >
         <option value="text">Text</option>
         <option value="number">Number</option>
         <option value="textarea">Text Area</option>
@@ -114,35 +83,67 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
         <option value="radio">Radio</option>
         <option value="checkbox">Checkbox</option>
         <option value="rating">Star Rating</option>
+        <option value="percentage">Percentage</option>
+        <option value="slider">Number Slider</option>
+        <option value="tags">Tags</option>
       </select>
-      {["radio", "checkbox", "select"].includes(type) && (
-        <div className="options-container">
+
+      {type === "slider" && (
+        <div>
+          <input
+            type="number"
+            placeholder="Min Value"
+            value={min}
+            onChange={(e) => setMin(Number(e.target.value))}
+          />
+          <input
+            type="number"
+            placeholder="Max Value"
+            value={max}
+            onChange={(e) => setMax(Number(e.target.value))}
+          />
+        </div>
+      )}
+
+      {["radio", "checkbox", "select", "tags"].includes(type) && (
+        <div>
           <h4>Options:</h4>
           {options.map((option, index) => (
-            <div key={index} className="option">
+            <div key={index}>
               <input
                 type="text"
                 placeholder={`Option ${index + 1}`}
                 value={option.name}
-                onChange={(e) => handleOptionChange(index, e.target.value)}
+                onChange={(e) =>
+                  setOptions((prev) =>
+                    prev.map((opt, idx) =>
+                      idx === index ? { ...opt, name: e.target.value } : opt
+                    )
+                  )
+                }
               />
             </div>
           ))}
-          <button onClick={addOption}>Add Option</button>
+          <button
+            onClick={() =>
+              setOptions([...options, { id: Date.now(), name: "" }])
+            }
+          >
+            Add Option
+          </button>
         </div>
       )}
+
       <label>
         <input
           type="checkbox"
           checked={required}
-          onChange={(e) => setRequired(e.target.checked)}
+          onChange={() => setRequired((prev) => !prev)}
         />
         Required
       </label>
-      <button
-        onClick={editingQuestion ? handleUpdateQuestion : handleAddQuestion}
-      >
-        {editingQuestion ? "Update Question" : "Next"}
+      <button onClick={handleSave}>
+        {editingQuestion ? "Update Question" : "Add Question"}
       </button>
     </div>
   );

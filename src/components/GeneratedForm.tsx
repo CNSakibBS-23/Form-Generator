@@ -139,6 +139,70 @@ const GeneratedForm: React.FC<GeneratedFormProps> = ({
                 ))}
               </div>
             )}
+            {question.type === "percentage" && (
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  placeholder="Enter percentage"
+                  value={formData[question.id] || ""}
+                  onChange={(e) =>
+                    handleInputChange(question.id, Number(e.target.value))
+                  }
+                  style={{ width: "80px", marginRight: "5px" }}
+                />
+                <span>%</span>
+              </div>
+            )}
+
+            {question.type === "slider" && (
+              <div className="slider-boxes">
+                {Array.from(
+                  { length: (question.max || 10) - (question.min || 0) + 1 },
+                  (_, idx) => (question.min || 0) + idx
+                ).map((num) => (
+                  <div
+                    key={num}
+                    className={`slider-box ${
+                      formData[question.id] >= num ? "selected" : ""
+                    }`}
+                    onClick={() => handleInputChange(question.id, num)}
+                  >
+                    {num}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {question.type === "tags" && (
+              <div className="tags-container">
+                {question.options?.map((option) => (
+                  <div
+                    key={option.id}
+                    className={`tag-box ${
+                      Array.isArray(formData[question.id]) &&
+                      formData[question.id].includes(option.name)
+                        ? "selected"
+                        : ""
+                    }`}
+                    onClick={() => {
+                      const currentValues = formData[question.id] || [];
+                      handleInputChange(
+                        question.id,
+                        currentValues.includes(option.name)
+                          ? currentValues.filter(
+                              (val: string) => val !== option.name
+                            )
+                          : [...currentValues, option.name]
+                      );
+                    }}
+                  >
+                    {option.name}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {question.type === "rating" && (
               <div className="star-rating">
