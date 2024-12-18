@@ -177,30 +177,36 @@ const GeneratedForm: React.FC<GeneratedFormProps> = ({
 
             {question.type === "tags" && (
               <div className="tags-container">
-                {question.options?.map((option) => (
-                  <div
-                    key={option.id}
-                    className={`tag-box ${
-                      Array.isArray(formData[question.id]) &&
-                      formData[question.id].includes(option.name)
-                        ? "selected"
-                        : ""
-                    }`}
-                    onClick={() => {
-                      const currentValues = formData[question.id] || [];
-                      handleInputChange(
-                        question.id,
-                        currentValues.includes(option.name)
-                          ? currentValues.filter(
-                              (val: string) => val !== option.name
-                            )
-                          : [...currentValues, option.name]
-                      );
-                    }}
-                  >
-                    {option.name}
-                  </div>
-                ))}
+                {question.options?.map((option) => {
+                  const currentValues = Array.isArray(formData[question.id])
+                    ? formData[question.id]
+                    : []; // Ensure it initializes as an array
+
+                  const isSelected = currentValues.includes(option.name);
+
+                  const handleTagClick = () => {
+                    const updatedValues = isSelected
+                      ? currentValues.filter(
+                          (val: string) => val !== option.name
+                        ) // Remove selected tag
+                      : [...currentValues, option.name]; // Add selected tag
+
+                    setFormData((prev) => ({
+                      ...prev,
+                      [question.id]: updatedValues,
+                    }));
+                  };
+
+                  return (
+                    <div
+                      key={option.id}
+                      className={`tag-box ${isSelected ? "selected" : ""}`}
+                      onClick={handleTagClick}
+                    >
+                      {option.name}
+                    </div>
+                  );
+                })}
               </div>
             )}
 
