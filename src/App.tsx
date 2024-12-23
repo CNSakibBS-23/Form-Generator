@@ -1,120 +1,206 @@
 import React, { useState } from "react";
 import QuestionForm from "./components/QuestionForm";
-import QuestionList from "./components/QuestionsList";
-import GeneratedForm from "./components/GeneratedForm";
+import QuestionsList from "./components/QuestionsList";
+import { Question, Section } from "./types";
 import "./App.css";
-import { Question } from "./types";
 
 const App: React.FC = () => {
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [showForm, setShowForm] = useState(false);
-  const [formUid, setFormUid] = useState<string>("");
+  const [formTitle, setFormTitle] = useState("");
+  const [formInstruction, setFormInstruction] = useState("");
+  const [formDeadline, setFormDeadline] = useState("");
+  const [sections, setSections] = useState<Section[]>([]);
+  const [currentSectionId, setCurrentSectionId] = useState<number | null>(null);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
 
-  const addQuestion = (question: Question) => {
-    setQuestions((prev) => [...prev, question]);
+  const addSection = () => {
+    const newSection: Section = {
+      id: Date.now(),
+      title: "",
+      description: "",
+      importance: "",
+      questions: [],
+    };
+    setSections((prev) => [...prev, newSection]);
+  };
+
+  const addQuestionToSection = (sectionId: number, question: Question) => {
+    setSections((prev) =>
+      prev.map((section) =>
+        section.id === sectionId
+          ? { ...section, questions: [...section.questions, question] }
+          : section
+      )
+    );
+  };
+
+  const updateQuestionInSection = (
+    sectionId: number,
+    updatedQuestion: Question
+  ) => {
+    setSections((prev) =>
+      prev.map((section) =>
+        section.id === sectionId
+          ? {
+              ...section,
+              questions: section.questions.map((q) =>
+                q.id === updatedQuestion.id ? updatedQuestion : q
+              ),
+            }
+          : section
+      )
+    );
   };
 
   const handleCreateForm = () => {
-    if (questions.length === 0) {
-      alert("Please add at least one question to generate the form.");
+    if (!formTitle.trim() || sections.length === 0) {
+      alert("Form title and at least one section are required.");
       return;
     }
 
-    const generatedFormUid = `${Date.now().toString(36)}-${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
-    setFormUid(generatedFormUid);
-
     const formattedJson = {
-      form_uid: generatedFormUid,
-      categories: [
-        {
-          id: 1,
-          name: "Surveyor Details",
-          questions: questions.map((q) => ({
-            id: q.id,
-            title: q.title,
-            required: q.required,
-            type: q.type,
-            options: q.options || [],
-          })),
-        },
-      ],
+      form_uid: `${Date.now().toString(36)}-${Math.random()
+        .toString(36)
+        .substr(2, 9)}`,
+      survey_title: formTitle,
+      instruction: formInstruction,
+      deadline: formDeadline,
+      total_questions: sections.reduce(
+        (total, section) => total + section.questions.length,
+        0
+      ),
+      categories: sections.map((section) => ({
+        id: section.id,
+        section_title: section.title,
+        section_description: section.description,
+        section_importance: section.importance,
+        questions: section.questions.map((question) => ({
+          id: question.id,
+          question_title: question.title,
+          instruction: question.instruction,
+          required: question.required,
+          type: question.type,
+          options: question.options || [],
+          min: question.min,
+          max: question.max,
+        })),
+      })),
     };
 
     console.log("Generated Form JSON:", JSON.stringify(formattedJson, null, 2));
-    setShowForm(true);
-  };
-
-  const handleSubmitForm = (formData: Record<number, any>) => {
-    const formattedJson = {
-      form_uid: formUid,
-      categories: [
-        {
-          id: 1,
-          name: "Default Category",
-          questions: questions.map((q) => ({
-            id: q.id,
-            title: q.title,
-            required: q.required,
-            type: q.type,
-            options: q.options || [],
-            value: formData[q.id] || null,
-          })),
-        },
-      ],
-    };
-
-    console.log("Submitted Form Data:", JSON.stringify(formattedJson, null, 2));
-  };
-
-  const deleteQuestion = (id: number) => {
-    setQuestions((prev) => prev.filter((q) => q.id !== id));
-  };
-
-  const editQuestion = (question: Question) => {
-    setEditingQuestion(question);
-  };
-
-  const updateQuestion = (updatedQuestion: Question) => {
-    setQuestions((prev) =>
-      prev.map((q) => (q.id === updatedQuestion.id ? updatedQuestion : q))
-    );
-    setEditingQuestion(null);
   };
 
   return (
     <div className="container">
-      <div className="question-form">
-        <QuestionForm
-          addQuestion={addQuestion}
-          editingQuestion={editingQuestion}
-          updateQuestion={updateQuestion}
+      <div className="form-details">
+        <h2>Form Details</h2>
+        <input
+          type="text"
+          placeholder="Form Title"
+          value={formTitle}
+          onChange={(e) => setFormTitle(e.target.value)}
         />
-      </div>
-
-      <div className="question-list">
-        <QuestionList
-          questions={questions}
-          deleteQuestion={deleteQuestion}
-          editQuestion={editQuestion}
+        <textarea
+          placeholder="Form Instruction"
+          value={formInstruction}
+          onChange={(e) => setFormInstruction(e.target.value)}
         />
-        <button className="create-form-btn" onClick={handleCreateForm}>
-          Create Form
+        <input
+          type="date"
+          placeholder="mm/dd/yyyy"
+          value={formDeadline}
+          onChange={(e) => setFormDeadline(e.target.value)}
+        />
+        <button onClick={addSection} className="add-section-btn">
+          Add Section
         </button>
       </div>
 
-      <div className="phone-mockup">
-        <div className="generated-form-container">
-          {showForm && (
-            <GeneratedForm
-              questions={questions}
-              handleSubmitForm={handleSubmitForm}
-            />
-          )}
+      {sections.map((section) => (
+        <div key={section.id} className="section-container">
+          <h3>{`Section ${sections.indexOf(section) + 1}`}</h3>
+          <input
+            type="text"
+            placeholder="Section Title"
+            value={section.title}
+            onChange={(e) =>
+              setSections((prev) =>
+                prev.map((s) =>
+                  s.id === section.id ? { ...s, title: e.target.value } : s
+                )
+              )
+            }
+          />
+          <textarea
+            placeholder="Section Description"
+            value={section.description}
+            onChange={(e) =>
+              setSections((prev) =>
+                prev.map((s) =>
+                  s.id === section.id
+                    ? { ...s, description: e.target.value }
+                    : s
+                )
+              )
+            }
+          />
+          <input
+            type="text"
+            placeholder="Section Importance"
+            value={section.importance}
+            onChange={(e) =>
+              setSections((prev) =>
+                prev.map((s) =>
+                  s.id === section.id ? { ...s, importance: e.target.value } : s
+                )
+              )
+            }
+          />
+          <QuestionsList
+            questions={section.questions}
+            deleteQuestion={(id) =>
+              setSections((prev) =>
+                prev.map((s) =>
+                  s.id === section.id
+                    ? {
+                        ...s,
+                        questions: s.questions.filter((q) => q.id !== id),
+                      }
+                    : s
+                )
+              )
+            }
+            editQuestion={(question) => {
+              setEditingQuestion(question);
+              setCurrentSectionId(section.id);
+            }}
+          />
+          <button
+            onClick={() => setCurrentSectionId(section.id)}
+            className="create-question-btn"
+          >
+            Add Question
+          </button>
         </div>
-      </div>
+      ))}
+
+      {currentSectionId && (
+        <QuestionForm
+          addQuestion={(question) => {
+            if (editingQuestion) {
+              updateQuestionInSection(currentSectionId, question);
+              setEditingQuestion(null);
+            } else {
+              addQuestionToSection(currentSectionId, question);
+            }
+            setCurrentSectionId(null);
+          }}
+          editingQuestion={editingQuestion}
+        />
+      )}
+
+      <button onClick={handleCreateForm} className="create-form-btn">
+        Create Form
+      </button>
     </div>
   );
 };

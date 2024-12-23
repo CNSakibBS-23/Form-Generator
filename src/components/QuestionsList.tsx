@@ -1,41 +1,33 @@
 import React from "react";
-import { Question } from "./QuestionForm";
+import { Question } from "../types";
 
-interface QuestionListProps {
+interface QuestionsListProps {
   questions: Question[];
   deleteQuestion: (id: number) => void;
   editQuestion: (question: Question) => void;
 }
 
-const QuestionList: React.FC<QuestionListProps> = ({
+const QuestionsList: React.FC<QuestionsListProps> = ({
   questions,
   deleteQuestion,
   editQuestion,
 }) => {
   return (
-    <div>
-      <h3>Questions List</h3>
+    <div className="questions-list">
+      <h4>Questions</h4>
       {questions.length === 0 ? (
         <p>No questions added yet.</p>
       ) : (
         <ul>
-          {questions.map((question, index) => (
-            <li key={question.id} className="question-item">
-              <span>
-                {index + 1}. {question.title}
-              </span>
-              <button
-                onClick={() => editQuestion(question)}
-                className="edit-btn"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => deleteQuestion(question.id)}
-                className="delete-btn"
-              >
-                Delete
-              </button>
+          {questions.map((question) => (
+            <li key={question.id}>
+              {question.title}
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button onClick={() => editQuestion(question)}>Edit</button>
+                <button onClick={() => deleteQuestion(question.id)}>
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>
@@ -44,4 +36,4 @@ const QuestionList: React.FC<QuestionListProps> = ({
   );
 };
 
-export default QuestionList;
+export default QuestionsList;

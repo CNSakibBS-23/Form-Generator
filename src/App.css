@@ -14,48 +14,132 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
+  flex-direction: column;
   gap: 20px;
-  justify-content: space-between;
 }
 
 h1 {
   text-align: center;
   margin-bottom: 20px;
   font-size: 28px;
+  color: #333;
 }
-.question-form {
+
+/* Form Details Section */
+.form-details {
   background-color: #ffffff;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 30%;
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.question-form label {
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-bottom: 10px;
-  margin-right: 14px;
-  font-weight: bold;
+.form-details input,
+.form-details textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.form-details textarea {
+  resize: none;
+  height: 80px;
+}
+
+.add-section-btn {
+  margin-top: 15px;
+  padding: 10px 15px;
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
   font-size: 14px;
 }
 
-.question-form .required-container {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  margin-top: 10px;
+.add-section-btn:hover {
+  background-color: #ff0000;
+}
+
+/* Section Container */
+.section-container {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 15px;
+}
+
+.section-container h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.section-container input,
+.section-container textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.section-container textarea {
+  resize: none;
+  height: 60px;
+}
+
+.create-question-btn {
+  padding: 8px 12px;
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.create-question-btn:hover {
+  background-color: #ff0000;
+}
+
+/* Question Form */
+.question-form {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.question-form h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.question-form input,
+.question-form textarea,
+.question-form select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.question-form textarea {
+  resize: none;
+  height: 80px;
 }
 
 .question-form button {
-  padding: 6px 8px;
-  background-color: #4caf50;
+  padding: 8px 12px;
+  background-color: #ff0000;
   color: white;
   border: none;
   cursor: pointer;
@@ -64,43 +148,39 @@ h1 {
 }
 
 .question-form button:hover {
-  background-color: #45a049;
+  background-color: #ff0000;
 }
 
-.question-list {
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 30%;
+/* Questions List */
+.questions-list {
+  margin-top: 20px;
 }
 
-.question-list ul {
+.questions-list h4 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.questions-list ul {
   list-style: none;
   padding: 0;
 }
 
-.question-list li {
+.questions-list li {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 10px;
-  padding: 8px;
+  padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
   background-color: #f9f9f9;
 }
 
-.question-list li span {
-  flex: 1;
-  font-size: 14px;
-  margin-right: 10px;
-}
-
-.question-list button {
+.questions-list li button {
   padding: 4px 8px;
-  margin-left: 5px;
-  background-color: #4caf50;
+  background-color: #dc3545;
   color: white;
   border: none;
   cursor: pointer;
@@ -108,176 +188,35 @@ h1 {
   font-size: 12px;
 }
 
-.question-list button:hover {
-  background-color: #45a049;
+.questions-list li button:hover {
+  background-color: #b02a37;
 }
 
+/* Form Creation Button */
 .create-form-btn {
   margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #4caf50;
+  padding: 10px 15px;
+  background-color: #ff0000;
   color: white;
   border: none;
   cursor: pointer;
   border-radius: 5px;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .create-form-btn:hover {
-  background-color: #45a049;
+  background-color: #ff0000;
 }
 
-input,
-select,
-textarea {
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-input[type="checkbox"] {
-  margin: 0;
-  transform: scale(1.2);
-}
-
-.generated-form-container {
-  position: absolute;
-  top: 120px;
-  left: 50px;
-  width: 240px;
-  height: 480px;
-  overflow-y: auto;
-  background-color: transparent;
-  font-size: 14px;
-  line-height: 1.2;
-  padding: 10px;
-  scrollbar-width: none;
-}
-
-.subtitle {
-  font-size: 9px;
-}
-
-.phone-mockup {
-  position: relative;
-  width: 350px;
-  height: 700px;
-  background-image: url("./assets/mobile-mockup.jpg");
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  border-radius: 20px;
-}
-
-.generated-form-container h2 {
-  font-size: 18px;
-  margin-bottom: 10px;
-}
-
-.generated-form-container label {
-  font-size: 12px;
-  font-weight: bold;
-  margin-bottom: 3px;
-}
-
-.generated-form-container input[type="text"],
-.generated-form-container select {
-  width: 100%;
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  margin-bottom: 10px;
-}
-
-.generated-form-container .form-field {
-  margin-bottom: 15px;
-}
-
-.generated-form-container ul {
-  padding-left: 20px;
-}
-
-.generated-form-container li {
-  font-size: 14px;
-}
-
-.form-field label {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: 5px;
-  cursor: pointer;
-}
-
-.form-field label:hover {
-  background-color: #f2f2f2;
-}
-
-.form-field label input[type="radio"],
-.form-field label input[type="checkbox"] {
-  margin: 0;
-  vertical-align: middle;
-}
-
-.form-field {
-  margin-bottom: 15px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-}
-
-.star-rating {
-  display: flex;
-  gap: 5px;
-  cursor: pointer;
-}
-
-.star {
-  font-size: 20px;
-  color: #ccc;
-  transition: color 0.2s ease-in-out;
-}
-
-.star.selected {
-  color: #ffc107;
-}
-
-.star:hover,
-.star:hover ~ .star {
-  color: #ffcd3c;
-}
-.create-form-btn {
-  margin-top: 20px;
-  padding: 8px 10px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  font-size: 12px;
-}
-
-.create-form-btn:hover {
-  background-color: #45a049;
-}
-
+/* Responsive Design */
 @media (max-width: 768px) {
   .container {
-    flex-direction: column;
-    align-items: center;
+    padding: 10px;
   }
 
-  .phone-mockup {
-    width: 90%;
-    height: auto;
-    background-size: contain;
-  }
-
-  .generated-form-container {
-    width: 90%;
+  .form-details,
+  .section-container,
+  .question-form {
+    padding: 15px;
   }
 }

@@ -1,149 +1,181 @@
 import React, { useState, useEffect } from "react";
-
-export interface Option {
-  id: number;
-  name: string;
-}
-
-export interface Question {
-  id: number;
-  title: string;
-  subtitle?: string;
-  type: string;
-  required: boolean;
-  options?: Option[];
-}
+import { Question, Option } from "../types";
 
 interface QuestionFormProps {
   addQuestion: (question: Question) => void;
-  editingQuestion: Question | null;
-  updateQuestion: (updatedQuestion: Question) => void;
+  editingQuestion?: Question | null;
 }
 
 const QuestionForm: React.FC<QuestionFormProps> = ({
   addQuestion,
   editingQuestion,
-  updateQuestion,
 }) => {
   const [title, setTitle] = useState("");
-  const [subtitle, setSubtitle] = useState("");
-  const [type, setType] = useState("text");
+  const [instruction, setInstruction] = useState("");
+  const [type, setType] = useState<Question["type"]>("text");
   const [required, setRequired] = useState(false);
   const [options, setOptions] = useState<Option[]>([{ id: 1, name: "" }]);
+  const [min, setMin] = useState<number>(0);
+  const [max, setMax] = useState<number>(10);
+  const [errors, setErrors] = useState<string>("");
 
+  // Prefill the form fields if editing a question
   useEffect(() => {
     if (editingQuestion) {
       setTitle(editingQuestion.title);
-      setSubtitle(editingQuestion.subtitle || "");
+      setInstruction(editingQuestion.instruction || "");
       setType(editingQuestion.type);
       setRequired(editingQuestion.required);
-      setOptions(editingQuestion.options || [{ id: 1, name: "" }]);
+      setOptions(editingQuestion.options || []);
+      setMin(editingQuestion.min || 0);
+      setMax(editingQuestion.max || 10);
     }
   }, [editingQuestion]);
 
-  const handleAddQuestion = () => {
-    if (title.trim() === "") return;
+  const validateForm = (): boolean => {
+    if (!title.trim()) {
+      setErrors("Title cannot be empty.");
+      return false;
+    }
+    if (["select", "radio", "checkbox", "tags"].includes(type)) {
+      const validOptions = options.filter((opt) => opt.name.trim() !== "");
+      if (validOptions.length === 0) {
+        setErrors("At least one option is required for the selected type.");
+        return false;
+      }
+    }
+    if (type === "slider" && (min >= max || min < 0 || max <= 0)) {
+      setErrors(
+        "Slider range is invalid. Ensure min < max and both are positive."
+      );
+      return false;
+    }
+    setErrors("");
+    return true;
+  };
+
+  const handleSave = () => {
+    if (!validateForm()) return;
+
     const newQuestion: Question = {
-      id: Date.now(),
+      id: editingQuestion?.id || Date.now(),
       title,
-      subtitle,
+      instruction,
       type,
       required,
-      options: options.filter((opt) => opt.name.trim() !== ""),
+      options: ["select", "radio", "checkbox", "tags"].includes(type)
+        ? options.filter((opt) => opt.name.trim() !== "")
+        : undefined,
+      min: type === "slider" ? min : undefined,
+      max: type === "slider" ? max : undefined,
     };
+
     addQuestion(newQuestion);
     resetForm();
   };
 
-  const handleUpdateQuestion = () => {
-    if (title.trim() === "") return;
-    const updatedQuestion: Question = {
-      ...editingQuestion!,
-      title,
-      subtitle,
-      type,
-      required,
-      options: options.filter((opt) => opt.name.trim() !== ""),
-    };
-    updateQuestion(updatedQuestion);
-    resetForm();
-  };
-
-  const handleOptionChange = (index: number, value: string) => {
-    const updatedOptions = [...options];
-    updatedOptions[index] = { id: index + 1, name: value };
-    setOptions(updatedOptions);
-  };
-
-  const addOption = () => {
-    setOptions((prevOptions) => [
-      ...prevOptions,
-      { id: prevOptions.length + 1, name: "" },
-    ]);
-  };
-
   const resetForm = () => {
     setTitle("");
-    setSubtitle("");
+    setInstruction("");
     setType("text");
     setRequired(false);
     setOptions([{ id: 1, name: "" }]);
+    setMin(0);
+    setMax(10);
+    setErrors("");
   };
 
   return (
-    <div className="form-container">
-      <h2>{editingQuestion ? "Edit Question" : "Create Question"}</h2>
+    <div className="question-form">
+      <h3>{editingQuestion ? "Edit Question" : "Add Question"}</h3>
+      {errors && <p style={{ color: "red" }}>{errors}</p>}
       <input
         type="text"
-        placeholder="Title"
+        placeholder="Question Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
       <input
         type="text"
-        placeholder="Subtitle (optional)"
-        value={subtitle}
-        onChange={(e) => setSubtitle(e.target.value)}
+        placeholder="Instruction (optional)"
+        value={instruction}
+        onChange={(e) => setInstruction(e.target.value)}
       />
-      <select value={type} onChange={(e) => setType(e.target.value)}>
+      <select
+        value={type}
+        onChange={(e) => setType(e.target.value as Question["type"])}
+      >
         <option value="text">Text</option>
         <option value="number">Number</option>
         <option value="textarea">Text Area</option>
         <option value="date">Date</option>
-        <option value="select">Select Box</option>
+        <option value="select">Select</option>
         <option value="radio">Radio</option>
         <option value="checkbox">Checkbox</option>
-        <option value="rating">Star Rating</option>
+        <option value="rating">Rating</option>
+        <option value="percentage">Percentage</option>
+        <option value="slider">Slider</option>
+        <option value="tags">Tags</option>
       </select>
-      {["radio", "checkbox", "select"].includes(type) && (
-        <div className="options-container">
-          <h4>Options:</h4>
+      {["select", "radio", "checkbox", "tags"].includes(type) && (
+        <div>
+          <h4>Options</h4>
           {options.map((option, index) => (
-            <div key={index} className="option">
-              <input
-                type="text"
-                placeholder={`Option ${index + 1}`}
-                value={option.name}
-                onChange={(e) => handleOptionChange(index, e.target.value)}
-              />
-            </div>
+            <input
+              key={index}
+              type="text"
+              placeholder={`Option ${index + 1}`}
+              value={option.name}
+              onChange={(e) =>
+                setOptions((prev) =>
+                  prev.map((opt, idx) =>
+                    idx === index ? { ...opt, name: e.target.value } : opt
+                  )
+                )
+              }
+            />
           ))}
-          <button onClick={addOption}>Add Option</button>
+          <button
+            onClick={() =>
+              setOptions([...options, { id: Date.now(), name: "" }])
+            }
+          >
+            Add Option
+          </button>
         </div>
       )}
-      <label>
-        <input
-          type="checkbox"
-          checked={required}
-          onChange={(e) => setRequired(e.target.checked)}
-        />
-        Required
-      </label>
-      <button
-        onClick={editingQuestion ? handleUpdateQuestion : handleAddQuestion}
-      >
-        {editingQuestion ? "Update Question" : "Next"}
-      </button>
+      {type === "slider" && (
+        <div>
+          <input
+            type="number"
+            placeholder="Min"
+            value={min}
+            onChange={(e) => setMin(Number(e.target.value))}
+          />
+          <input
+            type="number"
+            placeholder="Max"
+            value={max}
+            onChange={(e) => setMax(Number(e.target.value))}
+          />
+        </div>
+      )}
+      <div style={{ display: "flex", gap: "10px" }}>
+        <label>
+          <input
+            type="checkbox"
+            checked={required}
+            onChange={(e) => setRequired(e.target.checked)}
+          />
+          Required
+        </label>
+        <button
+          onClick={handleSave}
+          style={{ padding: "5px 10px", fontSize: "14px", height: "30px" }}
+        >
+          {editingQuestion ? "Update Question" : "Save Question"}
+        </button>
+      </div>
     </div>
   );
 };
