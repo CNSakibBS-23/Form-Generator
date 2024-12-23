@@ -6,7 +6,7 @@ export interface Option {
 export interface Question {
   id: number;
   title: string;
-  subtitle?: string;
+  instruction?: string;
   type:
     | "text"
     | "number"
@@ -21,6 +21,14 @@ export interface Question {
     | "tags";
   required: boolean;
   options?: Option[];
-  min?: number; // For slider range
-  max?: number; // For slider range
+  min?: number;
+  max?: number;
+}
+
+export interface Section {
+  id: number;
+  title: string;
+  description: string;
+  importance: string;
+  questions: Question[];
 }

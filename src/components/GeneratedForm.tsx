@@ -17,22 +17,16 @@ const GeneratedForm: React.FC<GeneratedFormProps> = ({
     setFormData((prev) => ({ ...prev, [questionId]: value }));
   };
 
-  const validateForm = () => {
-    const newErrors: Record<number, string> = {};
-    questions.forEach((question) => {
-      if (question.required && !formData[question.id]) {
-        newErrors[question.id] = `${question.title} is required`;
-      }
-    });
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = () => {
-    if (validateForm()) {
-      handleSubmitForm(formData);
-    }
-  };
+  // const validateForm = () => {
+  //   const newErrors: Record<number, string> = {};
+  //   questions.forEach((question) => {
+  //     if (question.required && !formData[question.id]) {
+  //       newErrors[question.id] = `${question.title} is required`;
+  //     }
+  //   });
+  //   setErrors(newErrors);
+  //   return Object.keys(newErrors).length === 0;
+  // };
 
   return (
     <div>
@@ -44,6 +38,14 @@ const GeneratedForm: React.FC<GeneratedFormProps> = ({
               {question.title}
               {question.required && " *"}
             </label>
+            {question.instruction && (
+              <div
+                className="instruction"
+                style={{ fontSize: "12px", color: "#555" }}
+              >
+                {question.instruction}
+              </div>
+            )}
 
             {question.type === "text" && (
               <input
@@ -139,6 +141,7 @@ const GeneratedForm: React.FC<GeneratedFormProps> = ({
                 ))}
               </div>
             )}
+
             {question.type === "percentage" && (
               <div style={{ display: "flex", alignItems: "center" }}>
                 <input
@@ -180,7 +183,7 @@ const GeneratedForm: React.FC<GeneratedFormProps> = ({
                 {question.options?.map((option) => {
                   const currentValues = Array.isArray(formData[question.id])
                     ? formData[question.id]
-                    : []; // Ensure it initializes as an array
+                    : [];
 
                   const isSelected = currentValues.includes(option.name);
 
@@ -188,8 +191,8 @@ const GeneratedForm: React.FC<GeneratedFormProps> = ({
                     const updatedValues = isSelected
                       ? currentValues.filter(
                           (val: string) => val !== option.name
-                        ) // Remove selected tag
-                      : [...currentValues, option.name]; // Add selected tag
+                        )
+                      : [...currentValues, option.name];
 
                     setFormData((prev) => ({
                       ...prev,
@@ -231,13 +234,6 @@ const GeneratedForm: React.FC<GeneratedFormProps> = ({
             )}
           </div>
         ))}
-        <button
-          type="button"
-          className="create-form-btn"
-          onClick={handleSubmit}
-        >
-          Submit
-        </button>
       </form>
     </div>
   );
